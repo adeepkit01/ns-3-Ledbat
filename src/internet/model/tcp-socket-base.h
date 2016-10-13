@@ -160,6 +160,9 @@ public:
   uint32_t               m_segmentSize;     //!< Segment size
   SequenceNumber32       m_lastAckedSeq;    //!< Last sequence ACKed
 
+  uint32_t m_rcvtsval;
+  uint32_t m_rcvtsecr;
+
   TracedValue<TcpCongState_t> m_congState;    //!< State in the Congestion state machine
   TracedValue<SequenceNumber32> m_highTxMark; //!< Highest seqno ever sent, regardless of ReTx
   TracedValue<SequenceNumber32> m_nextTxSequence; //!< Next seqnum to be sent (SND.NXT), ReTx pushes it back

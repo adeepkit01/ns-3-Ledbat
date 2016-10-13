@@ -1533,6 +1533,12 @@ TcpSocketBase::ReceivedAck (Ptr<Packet> packet, const TcpHeader& tcpHeader)
 
   m_tcb->m_lastAckedSeq = ackNumber;
 
+
+  Ptr<TcpOptionTS> tcbts;
+  tcbts = DynamicCast<TcpOptionTS> (tcpHeader.GetOption (TcpOption::TS));
+  m_tcb->m_rcvtsval = tcbts->GetTimestamp ();
+  m_tcb->m_rcvtsecr = tcbts->GetEcho();
+
   if (ackNumber == m_txBuffer->HeadSequence ()
       && ackNumber < m_tcb->m_nextTxSequence
       && packet->GetSize () == 0)
