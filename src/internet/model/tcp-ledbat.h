@@ -28,13 +28,11 @@
 
 namespace ns3 {
 
-
 struct OwdCircBuf
 {
   std::vector<uint32_t> buffer;
   uint32_t min;
 };
-
 
 /**
  * \ingroup congestionOps
@@ -62,19 +60,13 @@ public:
    */
   TcpLedbat (const TcpLedbat& sock);
   virtual ~TcpLedbat (void);
-
   virtual std::string GetName () const;
-
   virtual void PktsAcked (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked,
                           const Time& rtt);
-
   virtual uint32_t GetSsThresh (Ptr<const TcpSocketState> tcb,
                                 uint32_t bytesInFlight);
-
   virtual Ptr<TcpCongestionOps> Fork ();
-
   virtual void IncreaseWindow (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked);
-
   void SetDoSs (uint32_t doSS);
 
 protected:
@@ -118,6 +110,6 @@ private:
   void LedbatUpdateBaseDelay (uint32_t owd);
 };
 
-}
+} // namespace ns3
 
-#endif
+#endif /* TCPLEDBAT_H */
