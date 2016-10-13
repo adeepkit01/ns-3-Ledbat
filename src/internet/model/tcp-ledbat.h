@@ -19,11 +19,11 @@
  *
  */
 
-#ifndef TCPLEDBAT_H
-#define TCPLEDBAT_H
+#ifndef TCP_LEDBAT_H
+#define TCP_LEDBAT_H
 
-#include "ns3/tcp-congestion-ops.h"
 #include <vector>
+#include "ns3/tcp-congestion-ops.h"
 #include "ns3/event-id.h"
 
 namespace ns3 {
@@ -112,4 +112,4 @@ private:
 
 } // namespace ns3
 
-#endif /* TCPLEDBAT_H */
+#endif /* TCP_LEDBAT_H */
