@@ -35,30 +35,37 @@ TcpLedbat::GetTypeId (void)
     .SetParent<TcpNewReno> ()
     .AddConstructor<TcpLedbat> ()
     .SetGroupName ("Internet")
-    .AddAttribute ("TargetDelay", "Targeted Queue Belay",
+    .AddAttribute ("TargetDelay",
+                   "Targeted Queue Delay",
                    UintegerValue (100),
                    MakeUintegerAccessor (&TcpLedbat::m_Target),
                    MakeUintegerChecker<uint32_t> ())
-    .AddAttribute ("baseHistoryLen", "Number of Base delay Sample",
+    .AddAttribute ("baseHistoryLen",
+                   "Number of Base delay Sample",
                    UintegerValue (10),
                    MakeUintegerAccessor (&TcpLedbat::m_baseHistoLen),
                    MakeUintegerChecker<uint32_t> ())
-    .AddAttribute ("noiseFilterLen", "Number of Current delay Sample",
+    .AddAttribute ("noiseFilterLen",
+                   "Number of Current delay Sample",
                    UintegerValue (10),
                    MakeUintegerAccessor (&TcpLedbat::m_noiseFilterLen),
                    MakeUintegerChecker<uint32_t> ())
-    .AddAttribute ("ledbatSSThres", "Slow Start Threshold",
+    .AddAttribute ("ledbatSSThresh",
+                   "Slow Start Threshold",
                    UintegerValue (0xffff),
                    MakeUintegerAccessor (&TcpLedbat::m_ledbatSsthresh),
                    MakeUintegerChecker<uint32_t> ())
-    .AddAttribute ("Gain", "Offset Gain",
+    .AddAttribute ("Gain",
+                   "Offset Gain",
                    DoubleValue (1.0),
                    MakeDoubleAccessor (&TcpLedbat::m_gain),
                    MakeDoubleChecker<double> ())
-    .AddAttribute ("SSParam", "Possibility of Slow Start",
+    .AddAttribute ("SSParam",
+                   "Possibility of Slow Start",
                    UintegerValue (1),
                    MakeUintegerAccessor (&TcpLedbat::SetDoSs),
-                   MakeUintegerChecker<uint32_t> ());
+                   MakeUintegerChecker<uint32_t> ())
+  ;
   return tid;
 }
 
