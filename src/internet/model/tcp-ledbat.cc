@@ -202,6 +202,10 @@ void TcpLedbat::IncreaseWindow (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked)
 void TcpLedbat::CongestionAvoidance (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked)
 {
   NS_LOG_FUNCTION (this << tcb << segmentsAcked);
+  if ((m_flag & LEDBAT_VALID_OWD) == 0)
+    {
+      TcpNewReno::CongestionAvoidance (tcb, segmentsAcked); //letting it fall to TCP behaviour if no timestamps
+    }
   int64_t queue_delay;
   int64_t offset;
   int64_t cwnd;
@@ -303,6 +307,14 @@ void TcpLedbat::PktsAcked (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked,
                            const Time& rtt)
 {
   NS_LOG_FUNCTION (this << tcb << segmentsAcked << rtt);
+  if (tcb->m_rcvtsval == 0 || tcb->m_rcvtsecr == 0)
+    {
+      m_flag &= ~LEDBAT_VALID_OWD;
+    }
+  else
+    {
+      m_flag |= LEDBAT_VALID_OWD;
+    }
   if (rtt.IsPositive ())
     {
       LedbatUpdateCurrentDelay (tcb->m_rcvtsval - tcb->m_rcvtsecr);

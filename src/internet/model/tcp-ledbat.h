@@ -89,6 +89,7 @@ private:
 
   enum TcpLedbatState
   {
+    LEDBAT_VALID_OWD  = (1 << 1),
     LEDBAT_INCREASING = (1 << 2),
     LEDBAT_CAN_SS     = (1 << 3)
   };
