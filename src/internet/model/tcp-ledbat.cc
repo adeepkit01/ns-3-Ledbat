@@ -61,7 +61,7 @@ TcpLedbat::GetTypeId (void)
                    MakeDoubleAccessor (&TcpLedbat::m_gain),
                    MakeDoubleChecker<double> ())
     .AddAttribute ("SSParam",
-                   "Possibility of Slow Start",
+                   "Possibility of Slow Start:  0)DO_NOT_SLOWSTART 1)DO_SLOWSTART 2)DO_SLOWSTART_WITH_THRESHOLD",
                    UintegerValue (1),
                    MakeUintegerAccessor (&TcpLedbat::SetDoSs),
                    MakeUintegerChecker<uint32_t> ())
