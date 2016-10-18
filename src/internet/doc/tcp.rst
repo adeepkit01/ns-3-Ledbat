@@ -669,6 +669,35 @@ More information (paper):  http://www.hamilton.ie/net/htcp3.pdf
 
 More information (Internet Draft):  https://tools.ietf.org/html/draft-leith-tcp-htcp-06
 
+LEDBAT
+^^^^^^
+
+Low Extra Delay Background Transport (LEDBAT) is an experimental delay-based 
+congestion control algorithm that seeks to utilize the available bandwidth on
+an end-to-end path while limiting the consequent increase in queueing delay 
+on that path.  LEDBAT uses changes in one-way delay measurements to limit 
+congestion that the flow itself induces in the network.
+
+As a first approximation, a LEDBAT sender operates as shown below:
+
+on acknowledgement:
+
+.. math::
+       currentdelay = acknowledgement.delay
+       basedelay = min(basedelay, currentdelay)
+       queuingdelay = currentdelay - basedelay
+       offtarget = (TARGET - queuingdelay) / TARGET
+       cwnd += GAIN * offtarget * bytesnewlyacked * MSS / cwnd
+
+``TARGET`` is the maximum queueing delay that LEDBAT itself may introduce in the
+network, and ``GAIN`` determines the rate at which the cwnd responds to changes in 
+queueing delay;  ``offtarget`` is a normalized value representing the difference between
+the measured current queueing delay and the predetermined TARGET delay. offtarget can 
+be positive or negative; consequently, cwnd increases or decreases in proportion to 
+offtarget.
+
+More information (RFC):  https://tools.ietf.org/html/rfc6817
+
 Validation
 ++++++++++
 
