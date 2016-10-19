@@ -203,7 +203,7 @@ private:
   uint32_t m_baseHistoLen;           //!< Length of base delay history buffer
   uint32_t m_noiseFilterLen;         //!< Length of current delay buffer
   uint64_t m_lastRollover;           //!< Timestamp of last added delay
-  uint32_t m_sndCwndCnt;             //!< The congestion window addition parameter
+  int32_t m_sndCwndCnt;             //!< The congestion window addition parameter
   struct OwdCircBuf m_baseHistory;   //!< Buffer to store the base delay
   struct OwdCircBuf m_noiseFilter;   //!< Buffer to store the current delay
   uint32_t m_flag;                   //!< LEDBAT Flag

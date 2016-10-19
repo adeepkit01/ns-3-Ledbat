@@ -207,40 +207,31 @@ void TcpLedbat::CongestionAvoidance (Ptr<TcpSocketState> tcb, uint32_t segmentsA
       TcpNewReno::CongestionAvoidance (tcb, segmentsAcked); //letting it fall to TCP behaviour if no timestamps
     }
   int64_t queue_delay;
-  int64_t offset;
-  int64_t cwnd;
+  double offset;
+  uint32_t cwnd = (tcb->m_cWnd.Get ());
   uint32_t max_cwnd;
   int64_t current_delay;
   int64_t base_delay;
+  uint32_t absSndCnt;
 
-  max_cwnd = (tcb->m_cWnd.Get ()) * m_Target;
   current_delay = (int64_t)LedbatCurrentDelay (&TcpLedbat::LedbatMinCircBuff);
   base_delay = (int64_t)LedbatBaseDelay ();
   queue_delay = current_delay - base_delay;
-  offset = ((int64_t)m_Target) - (queue_delay);
+  offset = (((int64_t)m_Target) - (queue_delay));
   offset *= m_gain;
-  if (offset > m_Target)
+  m_sndCwndCnt = offset * segmentsAcked * tcb->m_segmentSize;
+  absSndCnt = m_sndCwndCnt > 0 ? (uint32_t)m_sndCwndCnt : (uint32_t)(-1 * m_sndCwndCnt);
+  if (absSndCnt >= tcb->m_cWnd.Get () * m_Target)
     {
-      offset = m_Target;
+      int32_t inc =  (m_sndCwndCnt) / (m_Target * tcb->m_cWnd.Get ());
+      cwnd += inc * tcb->m_segmentSize;
+      m_sndCwndCnt -= inc * tcb->m_cWnd.Get () * m_Target;
     }
-  cwnd = m_sndCwndCnt + offset;
-  if (cwnd >= 0)
-    {
-      m_sndCwndCnt = cwnd;
-      if  (m_sndCwndCnt > max_cwnd)
-        {
-          tcb->m_cWnd += tcb->m_segmentSize;
-          m_sndCwndCnt = 0;
-        }
-    }
-  else
-    {
-      if (tcb->m_cWnd.Get () > tcb->m_segmentSize)
-        {
-          tcb->m_cWnd -= tcb->m_segmentSize;
-          m_sndCwndCnt = (tcb->m_cWnd - tcb->m_segmentSize) * m_Target;
-        }
-    }
+
+  max_cwnd = (tcb->m_highTxMark.Get () - tcb->m_lastAckedSeq) + segmentsAcked * tcb->m_segmentSize;
+  cwnd = std::min (cwnd, max_cwnd);
+  cwnd = std::max (cwnd, tcb->m_segmentSize);
+  tcb->m_cWnd = cwnd;
 }
 
 void TcpLedbat::LedbatAddDelay (struct OwdCircBuf &cb, uint32_t owd, uint32_t maxlen)
@@ -254,8 +245,8 @@ void TcpLedbat::LedbatAddDelay (struct OwdCircBuf &cb, uint32_t owd, uint32_t ma
   cb.buffer.push_back (owd);
   if (cb.buffer[cb.min] > owd)
     {
+      cb.min = cb.buffer.size () - 1;
     }
-  cb.min = cb.buffer.size () - 1;
   if (cb.buffer.size () == maxlen)
     {
       cb.buffer.erase (cb.buffer.begin ());
