@@ -47,7 +47,7 @@ TcpLedbat::GetTypeId (void)
                    MakeUintegerChecker<uint32_t> ())
     .AddAttribute ("noiseFilterLen",
                    "Number of Current delay Sample",
-                   UintegerValue (10),
+                   UintegerValue (4),
                    MakeUintegerAccessor (&TcpLedbat::m_noiseFilterLen),
                    MakeUintegerChecker<uint32_t> ())
     .AddAttribute ("ledbatSSThresh",

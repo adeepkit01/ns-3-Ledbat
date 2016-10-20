@@ -262,6 +262,7 @@ def build(bld):
         'test/tcp-yeah-test.cc',
         'test/tcp-illinois-test.cc',
         'test/tcp-htcp-test.cc',
+        'test/tcp-ledbat-test.cc',
         'test/tcp-zero-window-test.cc',
         'test/tcp-pkts-acked-test.cc',
         'test/tcp-rtt-estimation.cc',
