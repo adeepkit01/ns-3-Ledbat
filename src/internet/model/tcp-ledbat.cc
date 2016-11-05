@@ -37,9 +37,9 @@ TcpLedbat::GetTypeId (void)
     .SetGroupName ("Internet")
     .AddAttribute ("TargetDelay",
                    "Targeted Queue Delay",
-                   UintegerValue (100),
-                   MakeUintegerAccessor (&TcpLedbat::m_Target),
-                   MakeUintegerChecker<uint32_t> ())
+                   TimeValue (MilliSeconds (100)),
+                   MakeTimeAccessor (&TcpLedbat::m_Target),
+                   MakeTimeChecker ())
     .AddAttribute ("baseHistoryLen",
                    "Number of Base delay Sample",
                    UintegerValue (10),
@@ -50,18 +50,13 @@ TcpLedbat::GetTypeId (void)
                    UintegerValue (4),
                    MakeUintegerAccessor (&TcpLedbat::m_noiseFilterLen),
                    MakeUintegerChecker<uint32_t> ())
-    .AddAttribute ("ledbatSSThresh",
-                   "Slow Start Threshold",
-                   UintegerValue (0xffff),
-                   MakeUintegerAccessor (&TcpLedbat::m_ledbatSsthresh),
-                   MakeUintegerChecker<uint32_t> ())
     .AddAttribute ("Gain",
                    "Offset Gain",
                    DoubleValue (1.0),
                    MakeDoubleAccessor (&TcpLedbat::m_gain),
                    MakeDoubleChecker<double> ())
     .AddAttribute ("SSParam",
-                   "Possibility of Slow Start:  0)DO_NOT_SLOWSTART 1)DO_SLOWSTART 2)DO_SLOWSTART_WITH_THRESHOLD",
+                   "Possibility of Slow Start:  0)DO_NOT_SLOWSTART 1)DO_SLOWSTART",
                    UintegerValue (1),
                    MakeUintegerAccessor (&TcpLedbat::SetDoSs),
                    MakeUintegerChecker<uint32_t> ())
@@ -86,20 +81,19 @@ TcpLedbat::TcpLedbat (void)
   : TcpNewReno ()
 {
   NS_LOG_FUNCTION (this);
-  m_Target = 100;
+  m_Target = MilliSeconds (100);
   m_gain = 1;
   m_doSs = 1;
-  m_ledbatSsthresh = 0xffff;
   m_baseHistoLen = 10;
   m_noiseFilterLen = 4;
-  LedbatInitCircbuf (m_baseHistory);
-  LedbatInitCircbuf (m_noiseFilter);
+  InitCircbuf (m_baseHistory);
+  InitCircbuf (m_noiseFilter);
   m_lastRollover = 0;
   m_sndCwndCnt = 0;
   m_flag = LEDBAT_CAN_SS;
 }
 
-void TcpLedbat::LedbatInitCircbuf (struct OwdCircBuf &buffer)
+void TcpLedbat::InitCircbuf (struct OwdCircBuf &buffer)
 {
   NS_LOG_FUNCTION (this);
   buffer.buffer.clear ();
@@ -115,7 +109,6 @@ TcpLedbat::TcpLedbat (const TcpLedbat& sock)
   m_doSs = sock.m_doSs;
   m_baseHistoLen = sock.m_baseHistoLen;
   m_noiseFilterLen = sock.m_noiseFilterLen;
-  m_ledbatSsthresh = sock.m_ledbatSsthresh;
   m_baseHistory = sock.m_baseHistory;
   m_noiseFilter = sock.m_noiseFilter;
   m_lastRollover = sock.m_lastRollover;
@@ -140,7 +133,7 @@ TcpLedbat::GetName () const
   return "TcpLedbat";
 }
 
-uint32_t TcpLedbat::LedbatMinCircBuff (struct OwdCircBuf &b)
+uint32_t TcpLedbat::MinCircBuff (struct OwdCircBuf &b)
 {
   if (b.buffer.size () == 0)
     {
@@ -152,14 +145,14 @@ uint32_t TcpLedbat::LedbatMinCircBuff (struct OwdCircBuf &b)
     }
 }
 
-uint32_t TcpLedbat::LedbatCurrentDelay (LedbatFilterFunction filter)
+uint32_t TcpLedbat::CurrentDelay (FilterFunction filter)
 {
   return filter (m_noiseFilter);
 }
 
-uint32_t TcpLedbat::LedbatBaseDelay ()
+uint32_t TcpLedbat::BaseDelay ()
 {
-  return LedbatMinCircBuff (m_baseHistory);
+  return MinCircBuff (m_baseHistory);
 }
 
 uint32_t TcpLedbat::GetSsThresh (Ptr<const TcpSocketState> tcb,
@@ -167,17 +160,7 @@ uint32_t TcpLedbat::GetSsThresh (Ptr<const TcpSocketState> tcb,
 {
   NS_LOG_FUNCTION (this << tcb << bytesInFlight);
   uint32_t res;
-  switch (m_doSs)
-    {
-    case DO_NOT_SLOWSTART:
-    case DO_SLOWSTART:
-    default:
-      res = TcpNewReno::GetSsThresh (tcb, bytesInFlight);
-      break;
-    case DO_SLOWSTART_WITH_THRESHOLD:
-      res = m_ledbatSsthresh;
-      break;
-    }
+  res = TcpNewReno::GetSsThresh (tcb, bytesInFlight);
   return res;
 }
 
@@ -205,6 +188,7 @@ void TcpLedbat::CongestionAvoidance (Ptr<TcpSocketState> tcb, uint32_t segmentsA
   if ((m_flag & LEDBAT_VALID_OWD) == 0)
     {
       TcpNewReno::CongestionAvoidance (tcb, segmentsAcked); //letting it fall to TCP behaviour if no timestamps
+      return;
     }
   int64_t queue_delay;
   double offset;
@@ -212,32 +196,33 @@ void TcpLedbat::CongestionAvoidance (Ptr<TcpSocketState> tcb, uint32_t segmentsA
   uint32_t max_cwnd;
   int64_t current_delay;
   int64_t base_delay;
-  uint32_t absSndCnt;
 
-  current_delay = (int64_t)LedbatCurrentDelay (&TcpLedbat::LedbatMinCircBuff);
-  base_delay = (int64_t)LedbatBaseDelay ();
+  current_delay = (int64_t)CurrentDelay (&TcpLedbat::MinCircBuff);
+  base_delay = (int64_t)BaseDelay ();
   queue_delay = current_delay - base_delay;
-  offset = (((int64_t)m_Target) - (queue_delay));
+  offset = (m_Target.GetMilliSeconds () - (queue_delay));
   offset *= m_gain;
   m_sndCwndCnt = offset * segmentsAcked * tcb->m_segmentSize;
-  absSndCnt = m_sndCwndCnt > 0 ? (uint32_t)m_sndCwndCnt : (uint32_t)(-1 * m_sndCwndCnt);
-  if (absSndCnt >= tcb->m_cWnd.Get () * m_Target)
-    {
-      int32_t inc =  (m_sndCwndCnt) / (m_Target * tcb->m_cWnd.Get ());
-      cwnd += inc * tcb->m_segmentSize;
-      m_sndCwndCnt -= inc * tcb->m_cWnd.Get () * m_Target;
-    }
+  double inc =  (m_sndCwndCnt * 1.0) / (m_Target.GetMilliSeconds () * tcb->m_cWnd.Get ());
+  cwnd += (inc * tcb->m_segmentSize);
 
   max_cwnd = (tcb->m_highTxMark.Get () - tcb->m_lastAckedSeq) + segmentsAcked * tcb->m_segmentSize;
   cwnd = std::min (cwnd, max_cwnd);
   cwnd = std::max (cwnd, tcb->m_segmentSize);
   tcb->m_cWnd = cwnd;
+
+  if (tcb->m_cWnd <= tcb->m_ssThresh)
+    {
+      tcb->m_ssThresh = tcb->m_cWnd - 1;
+    }
 }
 
-void TcpLedbat::LedbatAddDelay (struct OwdCircBuf &cb, uint32_t owd, uint32_t maxlen)
+void TcpLedbat::AddDelay (struct OwdCircBuf &cb, uint32_t owd, uint32_t maxlen)
 {
+  NS_LOG_FUNCTION (this << owd << maxlen << cb.buffer.size ());
   if (cb.buffer.size () == 0)
     {
+      NS_LOG_LOGIC ("First Value for queue");
       cb.buffer.push_back (owd);
       cb.min = 0;
       return;
@@ -247,10 +232,12 @@ void TcpLedbat::LedbatAddDelay (struct OwdCircBuf &cb, uint32_t owd, uint32_t ma
     {
       cb.min = cb.buffer.size () - 1;
     }
-  if (cb.buffer.size () == maxlen)
+  if (cb.buffer.size () >= maxlen)
     {
+      NS_LOG_LOGIC ("Queue full" << maxlen);
       cb.buffer.erase (cb.buffer.begin ());
       cb.min = 0;
+      NS_LOG_LOGIC ("Current min element" << cb.buffer[cb.min]);
       for (uint32_t i = 1; i < maxlen - 1; i++)
         {
           if (cb.buffer[i] < cb.buffer[cb.min])
@@ -261,16 +248,16 @@ void TcpLedbat::LedbatAddDelay (struct OwdCircBuf &cb, uint32_t owd, uint32_t ma
     }
 }
 
-void TcpLedbat::LedbatUpdateCurrentDelay (uint32_t owd)
+void TcpLedbat::UpdateCurrentDelay (uint32_t owd)
 {
-  LedbatAddDelay (m_noiseFilter, owd, m_noiseFilterLen);
+  AddDelay (m_noiseFilter, owd, m_noiseFilterLen);
 }
 
-void TcpLedbat::LedbatUpdateBaseDelay (uint32_t owd)
+void TcpLedbat::UpdateBaseDelay (uint32_t owd)
 {
   if (m_baseHistory.buffer.size () == 0)
     {
-      LedbatAddDelay (m_baseHistory, owd, m_baseHistoLen);
+      AddDelay (m_baseHistory, owd, m_baseHistoLen);
       return;
     }
   uint64_t timestamp = (uint64_t) Simulator::Now ().GetSeconds ();
@@ -278,7 +265,7 @@ void TcpLedbat::LedbatUpdateBaseDelay (uint32_t owd)
   if (timestamp - m_lastRollover > 60)
     {
       m_lastRollover = timestamp;
-      LedbatAddDelay (m_baseHistory, owd, m_baseHistoLen);
+      AddDelay (m_baseHistory, owd, m_baseHistoLen);
     }
   else
     {
@@ -308,8 +295,8 @@ void TcpLedbat::PktsAcked (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked,
     }
   if (rtt.IsPositive ())
     {
-      LedbatUpdateCurrentDelay (tcb->m_rcvtsval - tcb->m_rcvtsecr);
-      LedbatUpdateBaseDelay (tcb->m_rcvtsval - tcb->m_rcvtsecr);
+      UpdateCurrentDelay (tcb->m_rcvtsval - tcb->m_rcvtsecr);
+      UpdateBaseDelay (tcb->m_rcvtsval - tcb->m_rcvtsecr);
     }
 }
 }

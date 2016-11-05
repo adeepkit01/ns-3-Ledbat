@@ -696,6 +696,33 @@ the measured current queueing delay and the predetermined TARGET delay. offtarge
 be positive or negative; consequently, cwnd increases or decreases in proportion to 
 offtarget.
 
+The current implementation assumes that the clocks on the sender side and receiver side
+are synchronised. 
+
+Following the recommendation of RFC, we use the following
+default parameter settings:
+
+* TargetDelay = 100
+* baseHistoryLen = 10
+* noiseFilterLen = 4
+* Gain = 1
+
+To enable LEDBAT on all TCP sockets of any ns-3 program the following configuration 
+can be used:
+
+Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpLedbat::GetTypeId ()));
+
+To enable LEDBAT on a chosen TCP socket the following configuration can be used:
+
+Config::Set ("$ns3::NodeListPriv/NodeList/1/$ns3::TcpL4Protocol/SocketType", TypeIdValue (TcpLedbat::GetTypeId ()));
+
+To test the LEDBAT implementation unit tests have been written for the following cases:
+
+* LEDBAT falls to New Reno for slowstart
+* LEDBAT falls to New Reno if timestamps are not found
+* LEDBAT increment test
+* LEDBAT decrement test
+
 More information (RFC):  https://tools.ietf.org/html/rfc6817
 
 Validation

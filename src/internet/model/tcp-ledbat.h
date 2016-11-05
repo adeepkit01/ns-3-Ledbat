@@ -127,9 +127,9 @@ private:
    *
    * \param buffer The buffer to be initialised
    */
-  void LedbatInitCircbuf (struct OwdCircBuf &buffer);
+  void InitCircbuf (struct OwdCircBuf &buffer);
 
-  typedef uint32_t (*LedbatFilterFunction)(struct OwdCircBuf &);
+  typedef uint32_t (*FilterFunction)(struct OwdCircBuf &);
 
   /**
    * \brief Return the minimum delay of the buffer
@@ -137,7 +137,7 @@ private:
    * \param b The buffer
    * \return The minimum delay
    */
-  static uint32_t LedbatMinCircBuff (struct OwdCircBuf &b);
+  static uint32_t MinCircBuff (struct OwdCircBuf &b);
 
   /**
    * \brief Return the value of current delay
@@ -145,14 +145,14 @@ private:
    * \param filter The filter function
    * \return The current delay
    */
-  uint32_t LedbatCurrentDelay (LedbatFilterFunction filter);
+  uint32_t CurrentDelay (FilterFunction filter);
 
   /**
    * \brief Return the value of base delay
    *
    * \return The base delay
    */
-  uint32_t LedbatBaseDelay ();
+  uint32_t BaseDelay ();
 
   /**
    * \brief Add new delay to the buffers
@@ -161,21 +161,21 @@ private:
    * \param owd The new delay
    * \param maxlen The maximum permitted length
    */
-  void LedbatAddDelay (struct OwdCircBuf &cb, uint32_t owd, uint32_t maxlen);
+  void AddDelay (struct OwdCircBuf &cb, uint32_t owd, uint32_t maxlen);
 
   /**
    * \brief Update the current delay buffer
    *
    * \param owd The delay
    */
-  void LedbatUpdateCurrentDelay (uint32_t owd);
+  void UpdateCurrentDelay (uint32_t owd);
 
   /**
    * \brief Update the base delay buffer
    *
    * \param owd The delay
    */
-  void LedbatUpdateBaseDelay (uint32_t owd);
+  void UpdateBaseDelay (uint32_t owd);
 
   /**
    * \brief The slowstart types
@@ -184,7 +184,6 @@ private:
   {
     DO_NOT_SLOWSTART,           //!< Do not slowstart
     DO_SLOWSTART,               //!< Do New Reno Slowstart
-    DO_SLOWSTART_WITH_THRESHOLD //!< Do Slowstart with LEDBAT threshold
   };
 
   /**
@@ -196,10 +195,9 @@ private:
     LEDBAT_CAN_SS     = (1 << 3)   //!< If LEDBAT allows slow start
   };
 
-  uint32_t m_Target;                 //!< Target Queue Delay
+  Time m_Target;                     //!< Target Queue Delay
   double m_gain;                     //!< GAIN value from RFC
   uint32_t m_doSs;                   //!< Permissible Slow Start State
-  uint32_t m_ledbatSsthresh;         //!< The SS Threshold
   uint32_t m_baseHistoLen;           //!< Length of base delay history buffer
   uint32_t m_noiseFilterLen;         //!< Length of current delay buffer
   uint64_t m_lastRollover;           //!< Timestamp of last added delay
