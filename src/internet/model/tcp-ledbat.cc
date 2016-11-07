@@ -41,12 +41,12 @@ TcpLedbat::GetTypeId (void)
                    MakeTimeAccessor (&TcpLedbat::m_Target),
                    MakeTimeChecker ())
     .AddAttribute ("baseHistoryLen",
-                   "Number of Base delay Sample",
+                   "Number of Base delay samples",
                    UintegerValue (10),
                    MakeUintegerAccessor (&TcpLedbat::m_baseHistoLen),
                    MakeUintegerChecker<uint32_t> ())
     .AddAttribute ("noiseFilterLen",
-                   "Number of Current delay Sample",
+                   "Number of Current delay samples",
                    UintegerValue (4),
                    MakeUintegerAccessor (&TcpLedbat::m_noiseFilterLen),
                    MakeUintegerChecker<uint32_t> ())
@@ -86,14 +86,14 @@ TcpLedbat::TcpLedbat (void)
   m_doSs = 1;
   m_baseHistoLen = 10;
   m_noiseFilterLen = 4;
-  InitCircbuf (m_baseHistory);
-  InitCircbuf (m_noiseFilter);
+  InitCircBuf (m_baseHistory);
+  InitCircBuf (m_noiseFilter);
   m_lastRollover = 0;
   m_sndCwndCnt = 0;
   m_flag = LEDBAT_CAN_SS;
 }
 
-void TcpLedbat::InitCircbuf (struct OwdCircBuf &buffer)
+void TcpLedbat::InitCircBuf (struct OwdCircBuf &buffer)
 {
   NS_LOG_FUNCTION (this);
   buffer.buffer.clear ();
@@ -133,7 +133,7 @@ TcpLedbat::GetName () const
   return "TcpLedbat";
 }
 
-uint32_t TcpLedbat::MinCircBuff (struct OwdCircBuf &b)
+uint32_t TcpLedbat::MinCircBuf (struct OwdCircBuf &b)
 {
   if (b.buffer.size () == 0)
     {
@@ -152,7 +152,7 @@ uint32_t TcpLedbat::CurrentDelay (FilterFunction filter)
 
 uint32_t TcpLedbat::BaseDelay ()
 {
-  return MinCircBuff (m_baseHistory);
+  return MinCircBuf (m_baseHistory);
 }
 
 uint32_t TcpLedbat::GetSsThresh (Ptr<const TcpSocketState> tcb,
@@ -197,7 +197,7 @@ void TcpLedbat::CongestionAvoidance (Ptr<TcpSocketState> tcb, uint32_t segmentsA
   int64_t current_delay;
   int64_t base_delay;
 
-  current_delay = (int64_t)CurrentDelay (&TcpLedbat::MinCircBuff);
+  current_delay = (int64_t)CurrentDelay (&TcpLedbat::MinCircBuf);
   base_delay = (int64_t)BaseDelay ();
   queue_delay = current_delay - base_delay;
   offset = (m_Target.GetMilliSeconds () - (queue_delay));

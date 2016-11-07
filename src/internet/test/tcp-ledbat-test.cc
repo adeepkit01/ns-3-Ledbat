@@ -89,7 +89,7 @@ TcpLedbatToNewReno::DoRun ()
   NewRenoCong->IncreaseWindow (state, m_segmentsAcked);
 
   NS_TEST_ASSERT_MSG_EQ (m_state->m_cWnd.Get (), state->m_cWnd.Get (),
-                         "CWnd has not updated correctly");
+                         "cWnd has not updated correctly");
 }
 /**
  * \brief Testing the congestion avoidance increment on TcpLedbat
@@ -155,7 +155,7 @@ TcpLedbatIncrementTest::DoRun ()
   m_cWnd = m_cWnd + ((0.98 * m_segmentsAcked * m_segmentSize * m_segmentSize) / m_cWnd);
 
   NS_TEST_ASSERT_MSG_EQ (m_state->m_cWnd.Get (), m_cWnd,
-                         "CWnd has not updated correctly");
+                         "cWnd has not updated correctly");
 }
 
 /**
@@ -222,7 +222,7 @@ TcpLedbatDecrementTest::DoRun ()
   m_cWnd = m_cWnd - ((0.98 * m_segmentsAcked * m_segmentSize * m_segmentSize) / m_cWnd);
 
   NS_TEST_ASSERT_MSG_EQ (m_state->m_cWnd.Get (), m_cWnd,
-                         "CWnd has not updated correctly");
+                         "cWnd has not updated correctly");
 }
 
 static class TcpLedbatTestSuite : public TestSuite

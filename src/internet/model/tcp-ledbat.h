@@ -127,7 +127,7 @@ private:
    *
    * \param buffer The buffer to be initialised
    */
-  void InitCircbuf (struct OwdCircBuf &buffer);
+  void InitCircBuf (struct OwdCircBuf &buffer);
 
   typedef uint32_t (*FilterFunction)(struct OwdCircBuf &);
 
@@ -137,7 +137,7 @@ private:
    * \param b The buffer
    * \return The minimum delay
    */
-  static uint32_t MinCircBuff (struct OwdCircBuf &b);
+  static uint32_t MinCircBuf (struct OwdCircBuf &b);
 
   /**
    * \brief Return the value of current delay
