@@ -718,8 +718,8 @@ The following unit tests have been written to validate the implementation of LED
 
 * LEDBAT should operate same as NewReno for slow start
 * LEDBAT should operate same as NewReno if timestamps are not found
-* LEDBAT increment test
-* LEDBAT decrement test
+* Test to validate cwnd increment in LEDBAT
+* Test to validate cwnd decrement in LEDBAT
 
 More information is available in RFC 6817: https://tools.ietf.org/html/rfc6817
 
@@ -748,6 +748,7 @@ section below on :ref:`Writing-tcp-tests`.
 * **tcp-bic-test:** Unit tests on the BIC congestion control
 * **tcp-yeah-test:** Unit tests on the YeAH congestion control
 * **tcp-illinois-test:** Unit tests on the Illinois congestion control
+* **tcp-ledbat-test:** Unit tests on the LEDBAT congestion control
 * **tcp-option:** Unit tests on TCP options
 * **tcp-pkts-acked-test:** Unit test the number of time that PktsAcked is called
 * **tcp-rto-test:** Unit test behavior after a RTO timeout occurs
