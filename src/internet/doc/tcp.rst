@@ -675,19 +675,19 @@ LEDBAT
 Low Extra Delay Background Transport (LEDBAT) is an experimental delay-based 
 congestion control algorithm that seeks to utilize the available bandwidth on
 an end-to-end path while limiting the consequent increase in queueing delay 
-on that path.  LEDBAT uses changes in one-way delay measurements to limit 
+on that path. LEDBAT uses changes in one-way delay measurements to limit 
 congestion that the flow itself induces in the network.
 
-As a first approximation, a LEDBAT sender operates as shown below:
+As a first approximation, the LEDBAT sender operates as shown below:
 
-on acknowledgement:
+on receipt of an ACK:
 
 .. math::
        currentdelay = acknowledgement.delay
-       basedelay = min(basedelay, currentdelay)
+       basedelay = min (basedelay, currentdelay)
        queuingdelay = currentdelay - basedelay
        offtarget = (TARGET - queuingdelay) / TARGET
-       cwnd += GAIN * offtarget * bytesnewlyacked * MSS / cwnd
+       cWnd += GAIN * offtarget * bytesnewlyacked * MSS / cWnd
 
 ``TARGET`` is the maximum queueing delay that LEDBAT itself may introduce in the
 network, and ``GAIN`` determines the rate at which the cwnd responds to changes in 
@@ -699,31 +699,29 @@ offtarget.
 The current implementation assumes that the clocks on the sender side and receiver side
 are synchronised. 
 
-Following the recommendation of RFC, we use the following
-default parameter settings:
+Following the recommendation of RFC 6817, the default values of the parameters are:
 
 * TargetDelay = 100
 * baseHistoryLen = 10
 * noiseFilterLen = 4
 * Gain = 1
 
-To enable LEDBAT on all TCP sockets of any ns-3 program the following configuration 
-can be used:
+To enable LEDBAT on all TCP sockets, the following configuration can be used:
 
 Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpLedbat::GetTypeId ()));
 
-To enable LEDBAT on a chosen TCP socket the following configuration can be used:
+To enable LEDBAT on a chosen TCP socket, the following configuration can be used:
 
 Config::Set ("$ns3::NodeListPriv/NodeList/1/$ns3::TcpL4Protocol/SocketType", TypeIdValue (TcpLedbat::GetTypeId ()));
 
-To test the LEDBAT implementation unit tests have been written for the following cases:
+The following unit tests have been written to validate the implementation of LEDBAT:
 
-* LEDBAT falls to New Reno for slowstart
-* LEDBAT falls to New Reno if timestamps are not found
+* LEDBAT should operate same as NewReno for slow start
+* LEDBAT should operate same as NewReno if timestamps are not found
 * LEDBAT increment test
 * LEDBAT decrement test
 
-More information (RFC):  https://tools.ietf.org/html/rfc6817
+More information is available in RFC 6817: https://tools.ietf.org/html/rfc6817
 
 Validation
 ++++++++++
