@@ -92,7 +92,7 @@ TcpLedbatToNewReno::DoRun ()
                          "cWnd has not updated correctly");
 }
 /**
- * \brief Testing the congestion avoidance increment on TcpLedbat
+ * \brief Test to validate cWnd increment in LEDBAT
  */
 class TcpLedbatIncrementTest : public TestCase
 {
@@ -159,7 +159,7 @@ TcpLedbatIncrementTest::DoRun ()
 }
 
 /**
- * \brief Testing the congestion avoidance decrement on TcpLedbat
+ * \brief Test to validate cWnd decrement in LEDBAT
  */
 class TcpLedbatDecrementTest : public TestCase
 {
