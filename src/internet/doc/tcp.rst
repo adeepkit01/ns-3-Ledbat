@@ -696,9 +696,6 @@ the measured current queueing delay and the predetermined TARGET delay. offtarge
 be positive or negative; consequently, cwnd increases or decreases in proportion to 
 offtarget.
 
-The current implementation assumes that the clocks on the sender side and receiver side
-are synchronised. 
-
 Following the recommendation of RFC 6817, the default values of the parameters are:
 
 * TargetDelay = 100
@@ -708,11 +705,15 @@ Following the recommendation of RFC 6817, the default values of the parameters a
 
 To enable LEDBAT on all TCP sockets, the following configuration can be used:
 
-Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpLedbat::GetTypeId ()));
+::
+
+  Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpLedbat::GetTypeId ()));
 
 To enable LEDBAT on a chosen TCP socket, the following configuration can be used:
 
-Config::Set ("$ns3::NodeListPriv/NodeList/1/$ns3::TcpL4Protocol/SocketType", TypeIdValue (TcpLedbat::GetTypeId ()));
+::
+
+  Config::Set ("$ns3::NodeListPriv/NodeList/1/$ns3::TcpL4Protocol/SocketType", TypeIdValue (TcpLedbat::GetTypeId ()));
 
 The following unit tests have been written to validate the implementation of LEDBAT:
 
@@ -721,7 +722,15 @@ The following unit tests have been written to validate the implementation of LED
 * Test to validate cwnd increment in LEDBAT
 * Test to validate cwnd decrement in LEDBAT
 
-More information is available in RFC 6817: https://tools.ietf.org/html/rfc6817
+In comparison to RFC 6817, the scope and limitations of the current LEDBAT
+implementation are:
+
+* It assumes that the clocks on the sender side and receiver side are synchronised
+* In line with Linux implementation, the one-way delay is calculated at the sender
+side by using the timestamps option in TCP header
+* Only the MIN function is used for noise filtering 
+
+More information about LEDBAT is available in RFC 6817: https://tools.ietf.org/html/rfc6817
 
 Validation
 ++++++++++
