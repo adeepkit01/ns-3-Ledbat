@@ -716,8 +716,8 @@ Config::Set ("$ns3::NodeListPriv/NodeList/1/$ns3::TcpL4Protocol/SocketType", Typ
 
 The following unit tests have been written to validate the implementation of LEDBAT:
 
-* LEDBAT should operate same as NewReno for slow start
-* LEDBAT should operate same as NewReno if timestamps are not found
+* LEDBAT should operate same as NewReno during slow start
+* LEDBAT should operate same as NewReno if timestamps are disabled
 * Test to validate cwnd increment in LEDBAT
 * Test to validate cwnd decrement in LEDBAT
 

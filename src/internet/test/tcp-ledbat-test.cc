@@ -30,7 +30,7 @@ namespace ns3 {
 NS_LOG_COMPONENT_DEFINE ("TcpLedbatTestSuite");
 
 /**
- * \brief Testing the behaviour common to New Reno
+ * \brief LEDBAT should be same as NewReno during slow start, and when timestamps are disabled
  */
 class TcpLedbatToNewReno : public TestCase
 {
